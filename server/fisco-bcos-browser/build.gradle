@@ -1,23 +1,28 @@
-version '1.0'
-
-apply plugin: 'maven'
+// buildscript {
+//     plugins {
+//         id "org.springframework.boot" version "1.5.9.RELEASE"
+//     }
+// }
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+
+sourceCompatibility = 17
+targetCompatibility = 17
 
 [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
 
 // In this section you declare where to find the dependencies of your project
 repositories {
-    maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
+    maven { url "https://maven.aliyun.com/nexus/content/groups/public/" }
     maven { url "https://oss.sonatype.org/service/local/staging/deploy/maven2"}
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
     mavenLocal()
     mavenCentral()
 }
+
+
 
 def spring_version="4.3.25.RELEASE"
 List spring =[ 
@@ -79,16 +84,16 @@ List swagger = [
 
 
 dependencies {
-    compile spring,spring_boot,jaxb,logger,mysql,io,jackson,swagger
-    compile "com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.1"
-    compile "org.apache.commons:commons-lang3:3.10"
+    implementation spring,spring_boot,jaxb,logger,mysql,io,jackson,swagger
+    implementation "com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.1"
+    implementation "org.apache.commons:commons-lang3:3.10"
 
-    compile ('com.webank:data-export-sdk:1.7.4'){
+    implementation ('com.webank:data-export-sdk:1.7.4'){
         exclude group: 'ch.qos.logback', module: '*'
     }
 
-    annotationProcessor 'org.projectlombok:lombok:1.18.2'
-    compileOnly 'org.projectlombok:lombok:1.18.2'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+    compileOnly 'org.projectlombok:lombok:1.18.24'
 }
 
 configurations {
@@ -96,6 +101,8 @@ configurations {
    all*.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
    all*.exclude group: 'log4j', module: 'log4j'
 }
+
+processResources{ duplicatesStrategy 'exclude' }
 
 sourceSets {
     main {
@@ -114,6 +121,11 @@ clean {
 }
 
 jar {
+    classifier = 'all'
+    manifest {
+        attributes 'Main-Class': 'org.bcos.browser.Application'
+    }
+
     destinationDir file('dist/apps')
     archiveName project.name + '.jar'
     exclude '**/*.xml'
@@ -129,7 +141,7 @@ jar {
             into 'dist/script'
         }
         copy {
-            from configurations.runtime
+            from configurations.runtimeClasspath
             into 'dist/lib'
         }
         copy {
